@@ -1,5 +1,6 @@
 # arduino-dram-tester
-Test DRAM with Arduino Uno
+Test DRAM with Arduino MEGA 2560 (I used a chinese clone with only 12MHz)
+Forked from andremiller/arduino-dram-tester
 
 ## Basic DRAM tester, outputs results to Serial, based on:
 
@@ -9,18 +10,18 @@ Test DRAM with Arduino Uno
 
 ## Pinouts:
 
-* DRAM pin -> Arduino UNO pin
-* DIN -> 2
-* DOUT -> 3
-* CAS -> 5
-* RAS -> 6
-* WE -> 7
-* A0 to A5 -> 8 to 13
-* A6 to A9 -> A0 to A3
+* DRAM pin -> Arduino MEGA pin
+* DIN -> 53
+* DOUT -> 52
+* CAS -> 51
+* RAS -> 50
+* WE -> 49
+* A0 to A5 -> 22 to 27
+* A6 to A9 -> 36 to 39
 
 (Also connect DRAM supply pins)
 
-The number of address lines is configurable by setting ADDR_BITS
+The number of address lines needs to be set in ADDR_BITS
 
 ## Changes to original code:
 

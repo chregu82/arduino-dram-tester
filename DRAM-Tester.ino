@@ -8,11 +8,11 @@
 
 // Tested on Arduino UNO
 
-#define DIN             2
-#define DOUT            3
-#define CAS             5
-#define RAS             6
-#define WE              7
+#define DIN             53
+#define DOUT            52
+#define CAS             51
+#define RAS             50
+#define WE              49
 
 #define ADDR_BITS       9  // 9 for 256, 10 is max address bits
 
@@ -37,7 +37,7 @@ void setup()
 
   /* 10 is max address bits, even if chip is smaller */
   mask = (1 << 10) - 1; 
-  DDRB = mask & 0x3f;
+  DDRA = mask & 0x3f;
   mask >>= 6;
   DDRC = mask & 0x0f;
   
@@ -70,14 +70,14 @@ static inline int setAddress(int row, int col, int wrt)
   int val = 0;
 
 
-  PORTB = row & 0x3f;
+  PORTA = row & 0x3f;
   PORTC = (PORTC & 0xf0) | (row >> 6) & 0x0f;
   digitalWrite(RAS, LOW);
 
   if (wrt)
     digitalWrite(WE, LOW);
 
-  PORTB = col & 0x3f;
+  PORTA = col & 0x3f;
   PORTC = (PORTC & 0xf0) | (col >> 6) & 0x0f;
   digitalWrite(CAS, LOW);
 
@@ -244,6 +244,3 @@ void fillRandom(int seed)
   Serial.println("ms");
   return;
 }
-
-
-
