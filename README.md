@@ -17,7 +17,7 @@ Forked from andremiller/arduino-dram-tester
 * RAS -> 50
 * WE -> 49
 * A0 to A5 -> 22 to 27
-* A6 to A9 -> 36 to 39
+* A6 -> 37, A7 -> 36, A8 -> 35, A9 -> 34
 
 (Also connect DRAM supply pins)
 

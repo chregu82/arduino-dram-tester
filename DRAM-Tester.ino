@@ -6,18 +6,53 @@
  *            https://github.com/FozzTexx/DRAM-Tester
  */
 
-// Tested on Arduino UNO
+// Tested on Arduino MEGA 2560 China Clone with only 12MHz
 
-#define DIN             53
-#define DOUT            52
-#define CAS             51
-#define RAS             50
-#define WE              49
+#define DIN_P             53
+#define DIN             (1 << 0)    // Bit 0 on Port B
+#define DOUT_P            52
+#define DOUT            (1 << 1)    // Bit 1 on Port B
+#define CAS_P             51
+#define CAS             (1 << 2)    // Bit 2 on Port B
+#define RAS_P             50
+#define RAS             (1 << 3)    // Bit 3 on Port B
+
+// Write enable is on Pin 49 which is Bit 0 of Port L
+#define WE_P              49
+#define WE              (1 << 0)
 
 #define ADDR_BITS       9  // 9 for 256, 10 is max address bits
 
 void fillSame(int val);
 void fillAlternating(int start);
+
+void setDIN(int val)
+{
+  // Takes 150ns to toggle the state
+  if (val) PORTB |= DIN;
+  else PORTB &= ~DIN;
+}
+
+void setCAS(int val)
+{
+  // Takes 150ns to toggle the state
+  if (val) PORTB |= CAS;
+  else PORTB &= ~CAS;
+}
+
+void setRAS(int val)
+{
+  // Takes 150ns to toggle the state
+  if (val) PORTB |= RAS;
+  else PORTB &= ~RAS;
+}
+
+void setWE(int val)
+{
+  // Takes 150ns to toggle the state
+  if (val) PORTL |= WE;
+  else PORTL &= ~WE;
+}
 
 void setup()
 {
@@ -28,12 +63,12 @@ void setup()
   Serial.println(ADDR_BITS);
 
   
-  pinMode(DIN, OUTPUT);
-  pinMode(DOUT, INPUT);
+  pinMode(DIN_P, OUTPUT);
+  pinMode(DOUT_P, INPUT);
 
-  pinMode(CAS, OUTPUT);
-  pinMode(RAS, OUTPUT);
-  pinMode(WE, OUTPUT);
+  pinMode(CAS_P, OUTPUT);
+  pinMode(RAS_P, OUTPUT);
+  pinMode(WE_P, OUTPUT);
 
   /* 10 is max address bits, even if chip is smaller */
   mask = (1 << 10) - 1; 
@@ -41,9 +76,10 @@ void setup()
   mask >>= 6;
   DDRC = mask & 0x0f;
   
-  digitalWrite(CAS, HIGH);
-  digitalWrite(RAS, HIGH);
-  digitalWrite(WE, HIGH);
+  setCAS(HIGH);
+  setRAS(HIGH);
+  
+  setWE(HIGH);
 }
 
 void loop()
@@ -69,25 +105,30 @@ static inline int setAddress(int row, int col, int wrt)
 {
   int val = 0;
 
-
   PORTA = row & 0x3f;
   PORTC = (PORTC & 0xf0) | (row >> 6) & 0x0f;
-  digitalWrite(RAS, LOW);
+  setRAS(LOW);
 
   if (wrt)
-    digitalWrite(WE, LOW);
+  {
+    setWE(LOW);
+  }
 
   PORTA = col & 0x3f;
   PORTC = (PORTC & 0xf0) | (col >> 6) & 0x0f;
-  digitalWrite(CAS, LOW);
+  setCAS(LOW);
 
   if (wrt)
-    digitalWrite(WE, HIGH);
+  {
+    setWE(HIGH);
+  }
   else
-    val = digitalRead(DOUT);
+  {
+    val = digitalRead(DOUT_P);
+  }
  
-  digitalWrite(CAS, HIGH);
-  digitalWrite(RAS, HIGH);
+  setCAS(HIGH);
+  setRAS(HIGH);
 
   return val;
 }
@@ -119,7 +160,7 @@ void fillSame(int val)
 
   Serial.print("  Setting all bits set to: ");
   Serial.println(val);
-  digitalWrite(DIN, val);
+  setDIN(val);
 
   Serial.println("    Write");
   writeStartMillis = millis();
@@ -129,7 +170,7 @@ void fillSame(int val)
   writeEndMillis = millis();
 
   /* Reverse DIN in case DOUT is floating */
-  digitalWrite(DIN, !val);
+  setDIN(!val);
 
   
   Serial.println("    Read");
@@ -166,7 +207,7 @@ void fillAlternating(int start)
   writeStartMillis = millis();
   for (col = 0; col < (1 << ADDR_BITS); col++) {
     for (row = 0; row < (1 << ADDR_BITS); row++) {
-      digitalWrite(DIN, i);
+      setDIN(i);
       i = !i;
       setAddress(row, col, 1);
     }
@@ -215,7 +256,7 @@ void fillRandom(int seed)
       i = random(0,2);
       //i = 1;
       //Serial.println(i);
-      digitalWrite(DIN, i);
+      setDIN(i);
       setAddress(row, col, 1);
     }
   }
